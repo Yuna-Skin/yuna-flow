@@ -38,7 +38,7 @@ function CommunityPage() {
     const [{ data: list }, { data: likes }] = await Promise.all([
       supabase
         .from("community_posts")
-        .select("id, user_id, content, likes_count, created_at, profiles!community_posts_user_id_fkey(name), comments(id)")
+        .select("id, user_id, content, likes_count, created_at, profiles!community_posts_profile_fk(name), comments(id)")
         .order("created_at", { ascending: false }),
       supabase.from("post_likes").select("post_id").eq("user_id", user.id),
     ]);
@@ -47,7 +47,7 @@ function CommunityPage() {
       profiles: { name: string } | { name: string }[] | null;
       comments: { id: string }[] | null;
     };
-    const mapped: Post[] = ((list ?? []) as Row[]).map((p) => {
+    const mapped: Post[] = ((list ?? []) as unknown as Row[]).map((p) => {
       const prof = Array.isArray(p.profiles) ? p.profiles[0] : p.profiles;
       return {
         id: p.id,
@@ -91,11 +91,11 @@ function CommunityPage() {
   const loadComments = async (postId: string) => {
     const { data } = await supabase
       .from("comments")
-      .select("id, content, profiles!comments_user_id_fkey(name)")
+      .select("id, content, profiles!comments_profile_fk(name)")
       .eq("post_id", postId)
       .order("created_at");
     type CRow = { id: string; content: string; profiles: { name: string } | { name: string }[] | null };
-    const mapped = ((data ?? []) as CRow[]).map((c) => {
+    const mapped = ((data ?? []) as unknown as CRow[]).map((c) => {
       const prof = Array.isArray(c.profiles) ? c.profiles[0] : c.profiles;
       return { id: c.id, content: c.content, author_name: prof?.name ?? "Praticante" };
     });
