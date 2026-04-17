@@ -32,6 +32,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "Yuna — Yoga Coreano em 28 dias" },
       { name: "description", content: "Protocolo de yoga coreano em 28 dias. Construa o hábito da sua prática diária." },
       { name: "theme-color", content: "#FAF6F0" },
+      { property: "og:title", content: "Yuna — Yoga Coreano em 28 dias" },
+      { name: "twitter:title", content: "Yuna — Yoga Coreano em 28 dias" },
+      { property: "og:description", content: "Protocolo de yoga coreano em 28 dias. Construa o hábito da sua prática diária." },
+      { name: "twitter:description", content: "Protocolo de yoga coreano em 28 dias. Construa o hábito da sua prática diária." },
+      { name: "twitter:card", content: "summary" },
+      { property: "og:type", content: "website" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
