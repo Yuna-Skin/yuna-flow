@@ -224,6 +224,36 @@ function DayPage() {
           ) : submitting ? "Salvando..." : "Concluir dia"}
         </Button>
       </div>
+
+      <Dialog open={!!activeVideo} onOpenChange={(o) => !o && setActiveVideo(null)}>
+        <DialogContent className="max-w-2xl overflow-hidden border-0 bg-black p-0 sm:rounded-2xl">
+          <DialogHeader className="sr-only">
+            <DialogTitle>{activeVideo?.title ?? "Vídeo"}</DialogTitle>
+          </DialogHeader>
+          {activeVideo && (
+            /\.(mp4|webm|mov)(\?|$)/i.test(activeVideo.url) ? (
+              <video
+                key={activeVideo.url}
+                src={activeVideo.url}
+                autoPlay
+                loop
+                controls
+                playsInline
+                className="aspect-video w-full bg-black"
+              />
+            ) : (
+              <iframe
+                key={activeVideo.url}
+                src={activeVideo.url}
+                className="aspect-video w-full bg-black"
+                allow="autoplay; encrypted-media; picture-in-picture"
+                allowFullScreen
+                title={activeVideo.title}
+              />
+            )
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
