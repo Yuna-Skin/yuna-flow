@@ -22,6 +22,87 @@ export const Route = createFileRoute("/_authenticated/day/$dayNumber")({
 type Movement = { id: string; title: string; description: string | null; video_url: string | null; duration: string | null; order_index: number };
 type ExerciseRow = { id: string; title: string; order_index: number; movements: Movement[] | null };
 
+function MinimalVideoPlayer({ src }: { src: string }) {
+  const videoRef = React.useRef<HTMLVideoElement>(null);
+  const [playing, setPlaying] = useState(true);
+  const [muted, setMuted] = useState(false);
+  const [volume, setVolume] = useState(1);
+  const [showVolume, setShowVolume] = useState(false);
+
+  const togglePlay = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (v.paused) { v.play(); setPlaying(true); } else { v.pause(); setPlaying(false); }
+  };
+
+  const toggleMute = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    v.muted = !v.muted;
+    setMuted(v.muted);
+  };
+
+  const onVolume = (val: number) => {
+    const v = videoRef.current;
+    if (!v) return;
+    v.volume = val;
+    v.muted = val === 0;
+    setVolume(val);
+    setMuted(val === 0);
+  };
+
+  return (
+    <div className="relative">
+      <video
+        ref={videoRef}
+        src={src}
+        autoPlay
+        loop
+        playsInline
+        onClick={togglePlay}
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
+        className="aspect-[9/16] w-full bg-black object-cover"
+      />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-between gap-3 bg-gradient-to-t from-black/70 to-transparent p-4">
+        <button
+          type="button"
+          onClick={togglePlay}
+          aria-label={playing ? "Pausar" : "Reproduzir"}
+          className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur transition-colors hover:bg-white/25"
+        >
+          {playing ? <Pause className="h-5 w-5 fill-current" /> : <Play className="h-5 w-5 fill-current" />}
+        </button>
+        <div
+          className="pointer-events-auto flex items-center gap-2"
+          onMouseEnter={() => setShowVolume(true)}
+          onMouseLeave={() => setShowVolume(false)}
+        >
+          {showVolume && (
+            <input
+              type="range"
+              min={0}
+              max={1}
+              step={0.05}
+              value={muted ? 0 : volume}
+              onChange={(e) => onVolume(parseFloat(e.target.value))}
+              className="h-1 w-24 cursor-pointer accent-white"
+            />
+          )}
+          <button
+            type="button"
+            onClick={toggleMute}
+            aria-label={muted ? "Ativar som" : "Silenciar"}
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur transition-colors hover:bg-white/25"
+          >
+            {muted || volume === 0 ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function DayPage() {
   const { dayNumber } = Route.useParams();
   const navigate = useNavigate();
