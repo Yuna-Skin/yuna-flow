@@ -11,7 +11,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { ArrowLeft, Wind, Sparkles, Check, Play } from "lucide-react";
+import { ArrowLeft, Wind, Sparkles, Check, Play, Pause, Volume2, VolumeX } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
@@ -240,15 +240,7 @@ function DayPage() {
           </DialogHeader>
           {activeVideo && (
             /\.(mp4|webm|mov)(\?|$)/i.test(activeVideo.url) ? (
-              <video
-                key={activeVideo.url}
-                src={activeVideo.url}
-                autoPlay
-                loop
-                controls
-                playsInline
-                className="aspect-[9/16] w-full bg-black object-cover"
-              />
+              <MinimalVideoPlayer key={activeVideo.url} src={activeVideo.url} />
             ) : (
               <iframe
                 key={activeVideo.url}
