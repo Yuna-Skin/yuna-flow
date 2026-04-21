@@ -154,12 +154,12 @@ function DayPage() {
         <Accordion type="multiple" className="mt-2">
           {day.exercises.map((ex, idx) => (
             <AccordionItem key={ex.id} value={ex.id} className="border-b border-border">
-              <AccordionTrigger className="py-4 text-left">
+              <AccordionTrigger className="group py-4 text-left no-underline hover:no-underline [&>svg]:transition-transform">
                 <div className="flex items-center gap-3">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-sm font-medium text-accent-foreground">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-sm font-medium text-accent-foreground transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
                     {idx + 1}
                   </span>
-                  <span className="font-medium">{ex.title}</span>
+                  <span className="font-medium transition-colors group-hover:text-primary">{ex.title}</span>
                 </div>
               </AccordionTrigger>
               <AccordionContent>
