@@ -19,7 +19,7 @@ export const Route = createFileRoute("/_authenticated/day/$dayNumber")({
   component: DayPage,
 });
 
-type Movement = { id: string; title: string; description: string | null; video_url: string | null; duration: string | null; order_index: number };
+type Movement = { id: string; title: string; description: string | null; execution: string | null; video_url: string | null; duration: string | null; order_index: number };
 type ExerciseRow = { id: string; title: string; order_index: number; movements: Movement[] | null };
 
 function MinimalVideoPlayer({ src }: { src: string }) {
