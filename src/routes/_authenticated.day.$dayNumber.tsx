@@ -64,20 +64,20 @@ function MinimalVideoPlayer({ src }: { src: string }) {
         onPause={() => setPlaying(false)}
         className="aspect-[9/16] w-full bg-black object-cover"
       />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-between gap-3 bg-gradient-to-t from-black/70 to-transparent p-4">
-        <button
-          type="button"
-          onClick={togglePlay}
-          aria-label={playing ? "Pausar" : "Reproduzir"}
-          className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur transition-colors hover:bg-white/25"
-        >
-          {playing ? <Pause className="h-5 w-5 fill-current" /> : <Play className="h-5 w-5 fill-current" />}
-        </button>
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-between gap-3 bg-gradient-to-t from-black/60 to-transparent p-4">
         <div
           className="pointer-events-auto flex items-center gap-2"
           onMouseEnter={() => setShowVolume(true)}
           onMouseLeave={() => setShowVolume(false)}
         >
+          <button
+            type="button"
+            onClick={toggleMute}
+            aria-label={muted ? "Ativar som" : "Silenciar"}
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-surface text-foreground shadow-md transition-transform hover:scale-105"
+          >
+            {muted || volume === 0 ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
+          </button>
           {showVolume && (
             <input
               type="range"
@@ -86,18 +86,18 @@ function MinimalVideoPlayer({ src }: { src: string }) {
               step={0.05}
               value={muted ? 0 : volume}
               onChange={(e) => onVolume(parseFloat(e.target.value))}
-              className="h-1 w-24 cursor-pointer accent-white"
+              className="h-1 w-24 cursor-pointer accent-primary"
             />
           )}
-          <button
-            type="button"
-            onClick={toggleMute}
-            aria-label={muted ? "Ativar som" : "Silenciar"}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur transition-colors hover:bg-white/25"
-          >
-            {muted || volume === 0 ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
-          </button>
         </div>
+        <button
+          type="button"
+          onClick={togglePlay}
+          aria-label={playing ? "Pausar" : "Reproduzir"}
+          className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md transition-transform hover:scale-105"
+        >
+          {playing ? <Pause className="h-5 w-5 fill-current" /> : <Play className="h-5 w-5 fill-current" />}
+        </button>
       </div>
     </div>
   );
