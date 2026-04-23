@@ -94,9 +94,9 @@ function MinimalVideoPlayer({ src }: { src: string }) {
           type="button"
           onClick={togglePlay}
           aria-label={playing ? "Pausar" : "Reproduzir"}
-          className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md transition-transform hover:scale-105"
+          className="pointer-events-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg ring-4 ring-primary/20 transition-transform hover:scale-105"
         >
-          {playing ? <Pause className="h-5 w-5 fill-current" /> : <Play className="h-5 w-5 fill-current" />}
+          {playing ? <Pause className="h-7 w-7 fill-current" /> : <Play className="h-7 w-7 fill-current" />}
         </button>
       </div>
     </div>
