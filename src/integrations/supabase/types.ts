@@ -554,6 +554,7 @@ export type Database = {
     }
     Functions: {
       complete_day: { Args: { p_day_id: string }; Returns: Json }
+      current_user_has_content_access: { Args: never; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
