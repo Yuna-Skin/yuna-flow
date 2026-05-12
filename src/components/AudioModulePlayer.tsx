@@ -90,9 +90,19 @@ export function AudioModulePlayer({ audioUrl, ambientVideoUrl = "/ambient-loop.m
     const a = audioRef.current;
     if (!a || !audioUrl) return;
     if (a.paused) {
-      await ensureAnalyser();
       a.playbackRate = SPEEDS[speedIdx];
-      await a.play();
+      try {
+        await a.play();
+      } catch (err) {
+        console.error("Audio play failed", err);
+        return;
+      }
+      // analyser is best-effort — never block playback
+      try {
+        await ensureAnalyser();
+      } catch (err) {
+        console.warn("Analyser unavailable, fallback animation", err);
+      }
     } else {
       a.pause();
     }
