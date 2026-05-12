@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { toast } from "sonner";
 import DOMPurify from "dompurify";
 import { AudioModulePlayer } from "@/components/AudioModulePlayer";
+import { getPlayableDayAudioUrl } from "@/lib/day-audio.functions";
 
 export const Route = createFileRoute("/_authenticated/day/$dayNumber")({
   component: DayPage,
@@ -116,6 +117,11 @@ function DayPage() {
         .maybeSingle();
       if (error) throw error;
       if (!dayRow) return null;
+
+      const playableAudioUrl = await getPlayableDayAudioUrl({
+        data: { dayId: dayRow.id, audioUrl: dayRow.audio_url },
+      });
+
       const { data: exs } = await supabase
         .from("exercises")
         .select("id, title, order_index, movements(id, title, description, video_url, duration, order_index)")
@@ -123,6 +129,7 @@ function DayPage() {
         .order("order_index");
       return {
         ...dayRow,
+        audio_url: playableAudioUrl,
         exercises: ((exs as ExerciseRow[] | null) ?? []).map((e) => ({
           id: e.id,
           title: e.title,
