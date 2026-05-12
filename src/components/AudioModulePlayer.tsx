@@ -39,7 +39,7 @@ export function AudioModulePlayer({ audioUrl, ambientVideoUrl = "/ambient-loop.m
     ctxRef.current = ctx;
     analyserRef.current = analyser;
     sourceRef.current = source;
-    dataRef.current = new Uint8Array(analyser.frequencyBinCount);
+    dataRef.current = new Uint8Array(new ArrayBuffer(analyser.frequencyBinCount));
     if (ctx.state === "suspended") await ctx.resume();
   };
 
