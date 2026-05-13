@@ -19,6 +19,7 @@ function HomePage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const userId = user?.id;
+  const [selectedWeek, setSelectedWeek] = useState<number | null>(null);
 
   const daysQ = useQuery({
     queryKey: ["days"],
