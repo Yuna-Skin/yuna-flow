@@ -206,7 +206,7 @@ function DayPage() {
         queryClient.invalidateQueries({ queryKey: ["user_progress_full"] }),
         queryClient.invalidateQueries({ queryKey: ["user_streak"] }),
       ]);
-      toast.success("Marcado como não concluído");
+      toast.success("Não concluído");
       return;
     }
     const { error } = await supabase.rpc("complete_day", { p_day_id: day.id });
