@@ -88,7 +88,9 @@ function HomePage() {
   const currentDay = days.find((d) => !completedSet.has(d.id)) ?? days[days.length - 1];
   const isAllDone = completedCount === 28;
   const currentWeek = currentDay ? Math.ceil(currentDay.day_number / 7) : 1;
-  const weekDays = days.filter((d) => Math.ceil(d.day_number / 7) === currentWeek);
+  const totalWeeks = days.length ? Math.ceil(days[days.length - 1].day_number / 7) : 1;
+  const activeWeek = selectedWeek ?? currentWeek;
+  const weekDays = days.filter((d) => Math.ceil(d.day_number / 7) === activeWeek);
 
   return (
     <div className="px-4 pb-6 pt-8">
