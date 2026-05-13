@@ -188,8 +188,27 @@ function DayPage() {
   }, [loading, allowed, navigate]);
 
   const handleComplete = async () => {
-    if (!day) return;
+    if (!day || !user) return;
     setSubmitting(true);
+    if (isCompleted) {
+      const { error } = await supabase
+        .from("user_progress")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("day_id", day.id);
+      setSubmitting(false);
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["user_progress"] }),
+        queryClient.invalidateQueries({ queryKey: ["user_progress_full"] }),
+        queryClient.invalidateQueries({ queryKey: ["user_streak"] }),
+      ]);
+      toast.success("Marcado como não concluído");
+      return;
+    }
     const { error } = await supabase.rpc("complete_day", { p_day_id: day.id });
     setSubmitting(false);
     if (error) {
