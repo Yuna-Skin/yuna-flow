@@ -172,8 +172,10 @@ function DayPage() {
     staleTime: 10 * 60_000,
   });
 
-
+  const loading = authLoading || dayQ.isLoading || progressQ.isLoading || weeksQ.isLoading;
   const day = dayQ.data;
+  const weeks = weeksQ.data ?? [];
+  const weekNumber = day?.week_id ? weeks.findIndex((w) => w.id === day.week_id) + 1 : 0;
   const completedSet = progressQ.data ?? new Set<string>();
   const isCompleted = day ? completedSet.has(day.id) : false;
 
