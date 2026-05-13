@@ -167,8 +167,8 @@ function HomePage() {
             return (
               <Link
                 key={d.id}
-                to="/day/$dayNumber"
-                params={{ dayNumber: String(d.day_number) }}
+                to="/day/$dayId"
+                params={{ dayId: d.id }}
                 className={cn(
                   "flex aspect-square w-full items-center justify-center rounded-full text-sm font-semibold transition-all",
                   done
