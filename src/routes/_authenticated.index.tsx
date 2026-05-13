@@ -135,7 +135,7 @@ function HomePage() {
         </div>
 
         <Button
-          onClick={() => currentDay && navigate({ to: "/day/$dayNumber", params: { dayNumber: String(currentDay.day_number) } })}
+          onClick={() => currentDay && navigate({ to: "/day/$dayId", params: { dayId: currentDay.id } })}
           disabled={isAllDone}
           variant="primary"
           size="lg"
