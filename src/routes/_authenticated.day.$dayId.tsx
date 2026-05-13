@@ -114,7 +114,7 @@ function DayPage() {
     queryFn: async () => {
       const { data: dayRow, error } = await supabase
         .from("days")
-        .select("id, day_number, title, video_url, audio_url, respiration_text, reflection_text")
+        .select("id, day_number, title, video_url, audio_url, respiration_text, reflection_text, week_id, weeks(title, order_index)")
         .eq("id", dayId)
         .maybeSingle();
       if (error) throw error;
@@ -163,8 +163,19 @@ function DayPage() {
     },
   });
 
-  const loading = authLoading || dayQ.isLoading || progressQ.isLoading;
+  const weeksQ = useQuery({
+    queryKey: ["weeks-order"],
+    queryFn: async (): Promise<{ id: string; order_index: number }[]> => {
+      const { data } = await supabase.from("weeks").select("id, order_index").order("order_index");
+      return data ?? [];
+    },
+    staleTime: 10 * 60_000,
+  });
+
+  const loading = authLoading || dayQ.isLoading || progressQ.isLoading || weeksQ.isLoading;
   const day = dayQ.data;
+  const weeks = weeksQ.data ?? [];
+  const weekNumber = day?.week_id ? weeks.findIndex((w) => w.id === day.week_id) + 1 : 0;
   const completedSet = progressQ.data ?? new Set<string>();
   const isCompleted = day ? completedSet.has(day.id) : false;
 
@@ -233,7 +244,9 @@ function DayPage() {
       </div>
 
       <div className="px-5 pt-5">
-        <p className="text-xs uppercase tracking-widest text-primary">Dia {day.day_number}</p>
+        <p className="text-xs uppercase tracking-widest text-primary">
+          {weekNumber > 0 ? `Semana ${weekNumber} · ` : ""}Dia {day.day_number}
+        </p>
         <h1 className="mt-1 font-display text-3xl text-foreground">
           {day.title.replace(/^Dia \d+ — /, "")}
         </h1>
