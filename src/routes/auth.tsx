@@ -53,7 +53,7 @@ function AuthPage() {
         });
         if (error) throw error;
 
-        // Registra consentimento (best-effort; gate fará fallback se falhar)
+        // Registra consentimento + log jurídico (best-effort)
         try {
           await submitConsent({
             data: {
@@ -63,14 +63,25 @@ function AuthPage() {
               privacy_version: PRIVACY_VERSION,
             },
           });
+          await writeAuditLog({
+            data: {
+              event_type: "account_created",
+              terms_version: TERMS_VERSION,
+              privacy_version: PRIVACY_VERSION,
+            },
+          });
         } catch (err) {
-          console.warn("Falha ao registrar consentimento no signup", err);
+          console.warn("Falha ao registrar consentimento/log no signup", err);
         }
 
         toast.success("Conta criada! Bem-vinda ao Yuna 🌸");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
+        // Log jurídico de login (best-effort, não bloqueia o fluxo)
+        writeAuditLog({ data: { event_type: "login" } }).catch((e) =>
+          console.warn("audit log login failed", e),
+        );
         toast.success("Bom te ver de volta ✨");
       }
     } catch (err) {
