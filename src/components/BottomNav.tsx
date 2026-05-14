@@ -6,7 +6,7 @@ import { zeroRightClassName } from "react-remove-scroll-bar";
 type NavItem = { to: string; label: string; icon: typeof Home; exact?: boolean };
 const items: NavItem[] = [
   { to: "/", label: "Início", icon: Home, exact: true },
-  { to: "/feed", label: "Feed", icon: Sparkles },
+  { to: "/plus", label: "Plus", icon: Sparkles },
   { to: "/shop", label: "Loja", icon: ShoppingBag },
   { to: "/profile", label: "Perfil", icon: User },
 ];
