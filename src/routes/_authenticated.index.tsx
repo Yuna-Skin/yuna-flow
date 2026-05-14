@@ -154,7 +154,7 @@ function HomePage() {
             </SelectTrigger>
             <SelectContent>
               {weeks.map((w, i) => (
-                <SelectItem key={w.id} value={w.id}>{w.title || `Semana ${i + 1}`}</SelectItem>
+                <SelectItem key={w.id} value={w.id}>Semana {i + 1}</SelectItem>
               ))}
             </SelectContent>
           </Select>
