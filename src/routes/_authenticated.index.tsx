@@ -61,25 +61,11 @@ function HomePage() {
     },
   });
 
-  const streakQ = useQuery({
-    queryKey: ["user_streak", userId],
-    enabled: !!userId,
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("user_streak")
-        .select("current_streak")
-        .eq("user_id", userId!)
-        .maybeSingle();
-      return data?.current_streak ?? 0;
-    },
-  });
-
   const weeks = weeksQ.data ?? [];
   const allDays = weeks.flatMap((w) => w.days);
   const totalDays = allDays.length;
   const completedSet = progressQ.data ?? new Set<string>();
   const name = profileQ.data ?? "Praticante";
-  const streak = streakQ.data ?? 0;
 
   const completedCount = allDays.filter((d) => completedSet.has(d.id)).length;
   const currentDay = allDays.find((d) => !completedSet.has(d.id)) ?? allDays[allDays.length - 1];
@@ -170,15 +156,9 @@ function HomePage() {
 
   return (
     <div className="px-4 pb-6 pt-8">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-xs uppercase tracking-widest text-muted-foreground">Olá,</p>
-          <h1 className="mt-1 font-display text-[28px] leading-tight text-foreground">{name}</h1>
-        </div>
-        <div className="flex items-center gap-1.5 rounded-full glass border border-black/5 px-3 py-1.5">
-          <Flame className="h-4 w-4 text-primary" />
-          <span className="text-sm font-semibold text-foreground">{streak}</span>
-        </div>
+      <div>
+        <p className="text-xs uppercase tracking-widest text-muted-foreground">Olá,</p>
+        <h1 className="mt-1 font-display text-[28px] leading-tight text-foreground">{name}</h1>
       </div>
 
       <Card className="relative mt-6 h-[440px] overflow-hidden rounded-[40px] border-0 bg-black p-0 text-white shadow-2xl">
