@@ -161,8 +161,8 @@ function AuthPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            minLength={6}
-            placeholder="Mínimo 6 caracteres"
+            minLength={mode === "signup" ? 8 : 6}
+            placeholder={mode === "signup" ? "8+ caracteres com 1 número" : "Sua senha"}
             className="h-12 rounded-xl"
           />
         </div>
