@@ -1,10 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/lib/auth";
 import { Card } from "@/components/ui/card";
-import { Heart, Lightbulb, Play, FileText } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Lightbulb, Play, FileText, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/feed")({
   component: FeedPage,
@@ -16,84 +14,153 @@ type FeedItem = {
   title: string;
   content: string | null;
   media_url: string | null;
-  likes_count: number;
+};
+
+type Week = {
+  id: string;
+  title: string;
+  order_index: number;
+  thumbnail_url: string | null;
+  days: { id: string }[];
 };
 
 function FeedPage() {
-  const { user } = useAuth();
-  const [items, setItems] = useState<FeedItem[]>([]);
-  const [liked, setLiked] = useState<Set<string>>(new Set());
+  const itemsQ = useQuery({
+    queryKey: ["feed-items"],
+    queryFn: async (): Promise<FeedItem[]> => {
+      const { data } = await supabase
+        .from("feed_items")
+        .select("id, type, title, content, media_url")
+        .order("created_at", { ascending: false });
+      return (data ?? []) as FeedItem[];
+    },
+    staleTime: 5 * 60_000,
+  });
 
-  useEffect(() => {
-    if (!user) return;
-    (async () => {
-      const [{ data: list }, { data: likes }] = await Promise.all([
-        supabase.from("feed_items").select("*").order("created_at", { ascending: false }),
-        supabase.from("feed_likes").select("feed_item_id").eq("user_id", user.id),
-      ]);
-      setItems((list ?? []) as FeedItem[]);
-      setLiked(new Set((likes ?? []).map((l) => l.feed_item_id)));
-    })();
-  }, [user]);
+  const weeksQ = useQuery({
+    queryKey: ["feed-weeks"],
+    queryFn: async (): Promise<Week[]> => {
+      const { data } = await supabase
+        .from("weeks")
+        .select("id, title, order_index, thumbnail_url, days(id)")
+        .order("order_index", { ascending: true });
+      return (data ?? []) as Week[];
+    },
+    staleTime: 10 * 60_000,
+  });
 
-  const toggleLike = async (item: FeedItem) => {
-    if (!user) return;
-    const isLiked = liked.has(item.id);
-    // optimistic
-    setLiked((prev) => {
-      const n = new Set(prev);
-      if (isLiked) n.delete(item.id); else n.add(item.id);
-      return n;
-    });
-    setItems((prev) =>
-      prev.map((i) => (i.id === item.id ? { ...i, likes_count: i.likes_count + (isLiked ? -1 : 1) } : i)),
-    );
-    if (isLiked) {
-      await supabase.from("feed_likes").delete().eq("feed_item_id", item.id).eq("user_id", user.id);
-    } else {
-      await supabase.from("feed_likes").insert({ feed_item_id: item.id, user_id: user.id });
-    }
-  };
+  const items = itemsQ.data ?? [];
+  const weeks = weeksQ.data ?? [];
 
   return (
-    <div className="px-5 pb-6 pt-8">
-      <h1 className="font-display text-3xl text-foreground">Feed</h1>
-      <p className="text-sm text-muted-foreground">Inspirações para sua prática</p>
-
-      <div className="mt-6 space-y-4">
-        {items.map((item) => (
-          <Card key={item.id} className="overflow-hidden border-border p-0 shadow-sm">
-            {item.type === "video" && item.media_url && (
-              <div className="aspect-video bg-black">
-                <iframe src={item.media_url} className="h-full w-full" allowFullScreen title={item.title} />
-              </div>
-            )}
-            <div className="p-4">
-              <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-primary">
-                {item.type === "tip" && <><Lightbulb className="h-3.5 w-3.5" /> Dica</>}
-                {item.type === "text" && <><FileText className="h-3.5 w-3.5" /> Reflexão</>}
-                {item.type === "video" && <><Play className="h-3.5 w-3.5" /> Vídeo</>}
-              </div>
-              <h3 className="mt-2 font-display text-xl text-foreground">{item.title}</h3>
-              {item.content && (
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.content}</p>
-              )}
-              <button
-                onClick={() => toggleLike(item)}
-                className={cn(
-                  "mt-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm transition-colors",
-                  liked.has(item.id)
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                <Heart className={cn("h-4 w-4", liked.has(item.id) && "fill-primary")} />
-                {item.likes_count}
-              </button>
-            </div>
-          </Card>
-        ))}
+    <div className="px-5 pb-10 pt-8">
+      <div className="flex items-center gap-2">
+        <Sparkles className="h-4 w-4 text-primary" />
+        <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-primary">
+          Conteúdo
+        </p>
       </div>
+      <h1 className="mt-2 font-display text-3xl leading-tight text-foreground">
+        Dicas & jornada
+      </h1>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Aprenda mais sobre o programa e cada semana de prática
+      </p>
+
+      {weeks.length > 0 && (
+        <section className="mt-8">
+          <h2 className="text-[11px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+            Sobre o programa
+          </h2>
+          <div className="mt-3 space-y-3">
+            {weeks.map((w, i) => (
+              <Card
+                key={w.id}
+                className="relative overflow-hidden rounded-2xl border-0 bg-black p-0 text-white shadow-md"
+              >
+                {w.thumbnail_url ? (
+                  <img
+                    src={w.thumbnail_url}
+                    alt={w.title}
+                    className="absolute inset-0 h-full w-full object-cover opacity-70"
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-gradient-to-br from-zinc-800 to-black" />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
+                <div className="relative flex min-h-[120px] flex-col justify-center p-5">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                    Semana {i + 1} · {w.days.length} dias
+                  </p>
+                  <h3 className="mt-1 font-display text-2xl leading-tight">
+                    {w.title}
+                  </h3>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {items.length > 0 && (
+        <section className="mt-10">
+          <h2 className="text-[11px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+            Dicas & inspirações
+          </h2>
+          <div className="mt-3 space-y-4">
+            {items.map((item) => (
+              <Card
+                key={item.id}
+                className="overflow-hidden border-border p-0 shadow-sm"
+              >
+                {item.type === "video" && item.media_url && (
+                  <div className="aspect-video bg-black">
+                    <iframe
+                      src={item.media_url}
+                      className="h-full w-full"
+                      allowFullScreen
+                      title={item.title}
+                    />
+                  </div>
+                )}
+                <div className="p-5">
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                    {item.type === "tip" && (
+                      <>
+                        <Lightbulb className="h-3.5 w-3.5" /> Dica
+                      </>
+                    )}
+                    {item.type === "text" && (
+                      <>
+                        <FileText className="h-3.5 w-3.5" /> Reflexão
+                      </>
+                    )}
+                    {item.type === "video" && (
+                      <>
+                        <Play className="h-3.5 w-3.5" /> Vídeo
+                      </>
+                    )}
+                  </div>
+                  <h3 className="mt-2 font-display text-xl leading-tight text-foreground">
+                    {item.title}
+                  </h3>
+                  {item.content && (
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                      {item.content}
+                    </p>
+                  )}
+                </div>
+              </Card>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {items.length === 0 && weeks.length === 0 && (
+        <p className="mt-10 text-center text-sm text-muted-foreground">
+          Nenhum conteúdo disponível ainda.
+        </p>
+      )}
     </div>
   );
 }
