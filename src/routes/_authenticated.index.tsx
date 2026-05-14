@@ -29,7 +29,7 @@ function HomePage() {
     queryFn: async (): Promise<Week[]> => {
       const { data, error } = await supabase
         .from("weeks")
-        .select("id, title, order_index, days(id, day_number, title, audio_url)")
+        .select("id, title, order_index, thumbnail_url, days(id, day_number, title, audio_url)")
         .order("order_index", { ascending: true })
         .order("day_number", { foreignTable: "days", ascending: true });
       if (error) throw error;
