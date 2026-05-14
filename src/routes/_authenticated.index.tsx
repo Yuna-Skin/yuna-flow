@@ -367,12 +367,15 @@ function HomePage() {
                   </div>
                 </div>
               </div>
-              <div className="p-4">
-                <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-                  Dia {currentDay.day_number}
-                </p>
-                <p className="mt-1 font-display text-2xl leading-tight text-foreground">
-                  {currentDay.title ?? currentWeek?.title ?? ""}
+              <div className="p-5">
+                <div className="flex items-center gap-2">
+                  <span className="text-base leading-none">🫁</span>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                    {currentDay.respiration_text ? "Respire antes de começar" : currentDay.reflection_text ? "Reflexão de hoje" : `Dia ${currentDay.day_number}`}
+                  </p>
+                </div>
+                <p className="mt-2 font-display text-[15px] leading-[1.45] text-foreground/90">
+                  {currentDay.respiration_text ?? currentDay.reflection_text ?? currentDay.title ?? ""}
                 </p>
               </div>
             </Card>
