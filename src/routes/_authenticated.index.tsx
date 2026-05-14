@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Play, Pause, Check, Moon } from "lucide-react";
+import { Play, Pause, Check, Moon, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getPlayableDayAudioUrl } from "@/lib/day-audio.functions";
 import { optimizeCloudinary } from "@/lib/cloudinary";
@@ -77,7 +77,19 @@ function HomePage() {
 
   const currentWeek = weeks.find((w) => w.days.some((d) => d.id === currentDay?.id)) ?? weeks[0];
   const currentWeekIndex = currentWeek ? weeks.indexOf(currentWeek) : 0;
-  const activeWeek = weeks.find((w) => w.id === selectedWeekId) ?? currentWeek;
+
+  const isWeekUnlocked = (idx: number): boolean => {
+    if (idx <= 0) return true;
+    const prev = weeks[idx - 1];
+    if (!prev) return false;
+    const prevActive = prev.days.filter((d) => !d.is_rest);
+    return prevActive.length > 0 && prevActive.every((d) => completedSet.has(d.id));
+  };
+
+  const requestedWeek = weeks.find((w) => w.id === selectedWeekId);
+  const requestedWeekIndex = requestedWeek ? weeks.indexOf(requestedWeek) : -1;
+  const requestedUnlocked = requestedWeekIndex >= 0 && isWeekUnlocked(requestedWeekIndex);
+  const activeWeek = requestedUnlocked ? requestedWeek! : currentWeek;
   const activeWeekIndex = activeWeek ? weeks.indexOf(activeWeek) : 0;
   const weekDays = activeWeek?.days ?? [];
 
@@ -283,9 +295,17 @@ function HomePage() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {weeks.map((w, i) => (
-                <SelectItem key={w.id} value={w.id}>Semana {i + 1}</SelectItem>
-              ))}
+              {weeks.map((w, i) => {
+                const locked = !isWeekUnlocked(i);
+                return (
+                  <SelectItem key={w.id} value={w.id} disabled={locked}>
+                    <span className="flex items-center gap-2">
+                      Semana {i + 1}
+                      {locked && <Lock className="h-3 w-3 text-muted-foreground" />}
+                    </span>
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
           <span className="text-[11px] text-muted-foreground">{activeWeekTotal} dias + descanso</span>
