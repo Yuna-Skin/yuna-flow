@@ -130,28 +130,41 @@ function CommunityPage() {
           rows={3}
           className="resize-none border-0 bg-transparent p-0 shadow-none focus-visible:ring-0"
         />
-        <div className="mt-2 flex justify-end">
+        <div className="mt-2 flex items-center justify-between gap-2">
+          <p className="text-[11px] text-muted-foreground">
+            Sua mensagem passará por revisão antes de aparecer
+          </p>
           <Button onClick={submitPost} disabled={posting || !content.trim()} size="sm" className="rounded-full">
             <Send className="h-4 w-4" />
-            Publicar
+            Enviar
           </Button>
         </div>
       </Card>
 
       <div className="mt-5 space-y-3">
         {posts.length === 0 && (
-          <p className="py-8 text-center text-sm text-muted-foreground">Seja o primeiro a postar 🌸</p>
+          <p className="py-8 text-center text-sm text-muted-foreground">Seja a primeira a postar 🌸</p>
         )}
         {posts.map((p) => (
-          <Card key={p.id} className="p-4">
+          <Card key={p.id} className={cn("p-4", p.status === "pending" && "border-dashed border-primary/40 bg-primary/5")}>
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-accent text-sm font-medium text-accent-foreground">
                 {p.author_name[0]?.toUpperCase()}
               </div>
-              <div>
+              <div className="flex-1">
                 <p className="text-sm font-medium text-foreground">{p.author_name}</p>
                 <p className="text-xs text-muted-foreground">{new Date(p.created_at).toLocaleDateString("pt-BR")}</p>
               </div>
+              {p.status === "pending" && (
+                <span className="rounded-full bg-primary/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
+                  Em revisão
+                </span>
+              )}
+              {p.status === "rejected" && (
+                <span className="rounded-full bg-destructive/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-destructive">
+                  Rejeitado
+                </span>
+              )}
             </div>
             <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-foreground">{p.content}</p>
 
