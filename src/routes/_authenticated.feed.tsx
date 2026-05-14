@@ -2,19 +2,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
-import { Lightbulb, Play, FileText, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/feed")({
   component: FeedPage,
 });
-
-type FeedItem = {
-  id: string;
-  type: "video" | "tip" | "text";
-  title: string;
-  content: string | null;
-  media_url: string | null;
-};
 
 type Week = {
   id: string;
@@ -25,18 +17,6 @@ type Week = {
 };
 
 function FeedPage() {
-  const itemsQ = useQuery({
-    queryKey: ["feed-items"],
-    queryFn: async (): Promise<FeedItem[]> => {
-      const { data } = await supabase
-        .from("feed_items")
-        .select("id, type, title, content, media_url")
-        .order("created_at", { ascending: false });
-      return (data ?? []) as FeedItem[];
-    },
-    staleTime: 5 * 60_000,
-  });
-
   const weeksQ = useQuery({
     queryKey: ["feed-weeks"],
     queryFn: async (): Promise<Week[]> => {
@@ -49,7 +29,6 @@ function FeedPage() {
     staleTime: 10 * 60_000,
   });
 
-  const items = itemsQ.data ?? [];
   const weeks = weeksQ.data ?? [];
 
   return (
@@ -102,61 +81,7 @@ function FeedPage() {
         </section>
       )}
 
-      {items.length > 0 && (
-        <section className="mt-10">
-          <h2 className="text-[11px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
-            Dicas & inspirações
-          </h2>
-          <div className="mt-3 space-y-4">
-            {items.map((item) => (
-              <Card
-                key={item.id}
-                className="overflow-hidden border-border p-0 shadow-sm"
-              >
-                {item.type === "video" && item.media_url && (
-                  <div className="aspect-video bg-black">
-                    <iframe
-                      src={item.media_url}
-                      className="h-full w-full"
-                      allowFullScreen
-                      title={item.title}
-                    />
-                  </div>
-                )}
-                <div className="p-5">
-                  <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                    {item.type === "tip" && (
-                      <>
-                        <Lightbulb className="h-3.5 w-3.5" /> Dica
-                      </>
-                    )}
-                    {item.type === "text" && (
-                      <>
-                        <FileText className="h-3.5 w-3.5" /> Reflexão
-                      </>
-                    )}
-                    {item.type === "video" && (
-                      <>
-                        <Play className="h-3.5 w-3.5" /> Vídeo
-                      </>
-                    )}
-                  </div>
-                  <h3 className="mt-2 font-display text-xl leading-tight text-foreground">
-                    {item.title}
-                  </h3>
-                  {item.content && (
-                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                      {item.content}
-                    </p>
-                  )}
-                </div>
-              </Card>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {items.length === 0 && weeks.length === 0 && (
+      {weeks.length === 0 && (
         <p className="mt-10 text-center text-sm text-muted-foreground">
           Nenhum conteúdo disponível ainda.
         </p>
