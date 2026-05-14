@@ -7,7 +7,7 @@ import { useAuth } from "@/lib/auth";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Play, Pause, Check } from "lucide-react";
+import { Play, Pause, Check, Moon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getPlayableDayAudioUrl } from "@/lib/day-audio.functions";
 import { getSignedWeekThumbnailUrl } from "@/lib/week-thumbnail.functions";
@@ -16,7 +16,7 @@ export const Route = createFileRoute("/_authenticated/")({
   component: HomePage,
 });
 
-type Day = { id: string; day_number: number; title: string; audio_url: string | null; respiration_text?: string | null; reflection_text?: string | null };
+type Day = { id: string; day_number: number; title: string; audio_url: string | null; respiration_text?: string | null; reflection_text?: string | null; is_rest?: boolean };
 type Week = { id: string; title: string; order_index: number; thumbnail_url: string | null; days: Day[] };
 
 function HomePage() {
@@ -30,7 +30,7 @@ function HomePage() {
     queryFn: async (): Promise<Week[]> => {
       const { data, error } = await supabase
         .from("weeks")
-        .select("id, title, order_index, thumbnail_url, days(id, day_number, title, audio_url, respiration_text, reflection_text)")
+        .select("id, title, order_index, thumbnail_url, days(id, day_number, title, audio_url, respiration_text, reflection_text, is_rest)")
         .order("order_index", { ascending: true })
         .order("day_number", { foreignTable: "days", ascending: true });
       if (error) throw error;
