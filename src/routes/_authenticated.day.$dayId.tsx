@@ -29,6 +29,7 @@ type ExerciseRow = { id: string; title: string; order_index: number; movements: 
 
 function MinimalVideoPlayer({ src }: { src: string }) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const queryClient = useQueryClient();
   const [playing, setPlaying] = useState(true);
   const [muted, setMuted] = useState(false);
   const [volume, setVolume] = useState(1);
@@ -67,6 +68,10 @@ function MinimalVideoPlayer({ src }: { src: string }) {
         onClick={togglePlay}
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
+        onError={() => {
+          // signed URL expirada — força re-fetch do day para renovar
+          queryClient.invalidateQueries({ queryKey: ["day"] });
+        }}
         className="aspect-[9/16] w-full bg-black object-cover"
       />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 bg-gradient-to-t from-black/60 to-transparent p-4">
@@ -148,7 +153,7 @@ function DayPage() {
         })),
       };
     },
-    staleTime: 10 * 60_000,
+    staleTime: 45 * 60_000,
   });
 
   const progressQ = useQuery({
@@ -303,7 +308,10 @@ function DayPage() {
   return (
     <div className="pb-32">
       <div className="relative">
-        <AudioModulePlayer audioUrl={day.audio_url ?? null} />
+        <AudioModulePlayer
+          audioUrl={day.audio_url ?? null}
+          onSourceError={() => queryClient.invalidateQueries({ queryKey: ["day", dayId, user?.id] })}
+        />
         <button
           onClick={() => navigate({ to: "/" })}
           className="absolute left-4 top-4 z-30 flex h-10 w-10 items-center justify-center rounded-full bg-background/80 backdrop-blur"

@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +12,7 @@ import { Play, Pause, Check, Moon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getPlayableDayAudioUrl } from "@/lib/day-audio.functions";
 import { getSignedWeekThumbnailUrl } from "@/lib/week-thumbnail.functions";
+import { LazyVideo } from "@/components/LazyVideo";
 
 export const Route = createFileRoute("/_authenticated/")({
   component: HomePage,
@@ -24,6 +25,7 @@ function HomePage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const userId = user?.id;
+  const queryClient = useQueryClient();
   const [selectedWeekId, setSelectedWeekId] = useState<string | null>(null);
 
   const weeksQ = useQuery({
@@ -97,7 +99,7 @@ function HomePage() {
         return currentDay.audio_url;
       }
     },
-    staleTime: 30 * 60_000,
+    staleTime: 45 * 60_000,
   });
 
   const fetchThumb = useServerFn(getSignedWeekThumbnailUrl);
@@ -113,7 +115,7 @@ function HomePage() {
         return activeWeek.thumbnail_url;
       }
     },
-    staleTime: 30 * 60_000,
+    staleTime: 45 * 60_000,
   });
 
   const activeWeekDays = weekDays.filter((d) => !d.is_rest);
@@ -196,6 +198,9 @@ function HomePage() {
             alt={activeWeek?.title ?? "Semana"}
             decoding="async"
             fetchPriority="high"
+            onError={() => {
+              queryClient.invalidateQueries({ queryKey: ["week-thumb", activeWeek?.id, activeWeek?.thumbnail_url] });
+            }}
             className="absolute inset-0 h-full w-full object-cover transition-transform duration-1000 hover:scale-105"
           />
         ) : (
@@ -342,7 +347,7 @@ function HomePage() {
           <Link to="/day/$dayId" params={{ dayId: currentDay.id }} className="mt-3 block">
             <Card className="overflow-hidden p-0 transition-all hover:shadow-md active:scale-[0.99]">
               <div className="relative aspect-[4/5] w-full overflow-hidden bg-gradient-to-br from-zinc-900 via-zinc-800 to-black">
-                <video
+                <LazyVideo
                   src="https://res.cloudinary.com/dqsuj0pjy/video/upload/v1778737301/Sorriso_leve_e_natural_202605121914_e9yfcu.mp4"
                   autoPlay
                   loop
@@ -358,6 +363,10 @@ function HomePage() {
                     ref={audioRef}
                     src={audioQ.data}
                     preload="metadata"
+                    onError={() => {
+                      // signed URL pode ter expirado — invalida pra re-buscar
+                      queryClient.invalidateQueries({ queryKey: ["day-playable-audio", currentDay?.id] });
+                    }}
                     onEnded={() => setIsPlaying(false)}
                     onPause={() => setIsPlaying(false)}
                     onPlay={() => setIsPlaying(true)}
