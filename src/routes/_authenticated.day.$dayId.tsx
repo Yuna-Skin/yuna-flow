@@ -308,7 +308,10 @@ function DayPage() {
   return (
     <div className="pb-32">
       <div className="relative">
-        <AudioModulePlayer audioUrl={day.audio_url ?? null} />
+        <AudioModulePlayer
+          audioUrl={day.audio_url ?? null}
+          onSourceError={() => queryClient.invalidateQueries({ queryKey: ["day", dayId, user?.id] })}
+        />
         <button
           onClick={() => navigate({ to: "/" })}
           className="absolute left-4 top-4 z-30 flex h-10 w-10 items-center justify-center rounded-full bg-background/80 backdrop-blur"

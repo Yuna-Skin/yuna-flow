@@ -9,9 +9,10 @@ type Props = {
   audioUrl: string | null;
   ambientVideoUrl?: string;
   poster?: string;
+  onSourceError?: () => void;
 };
 
-export function AudioModulePlayer({ audioUrl, ambientVideoUrl = "https://res.cloudinary.com/dqsuj0pjy/video/upload/v1778737301/Sorriso_leve_e_natural_202605121914_e9yfcu.mp4", poster }: Props) {
+export function AudioModulePlayer({ audioUrl, ambientVideoUrl = "https://res.cloudinary.com/dqsuj0pjy/video/upload/v1778737301/Sorriso_leve_e_natural_202605121914_e9yfcu.mp4", poster, onSourceError }: Props) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const ctxRef = useRef<AudioContext | null>(null);
@@ -150,6 +151,7 @@ export function AudioModulePlayer({ audioUrl, ambientVideoUrl = "https://res.clo
           onPause={() => setPlaying(false)}
           onEnded={() => setPlaying(false)}
           onTimeUpdate={onTimeUpdate}
+          onError={() => onSourceError?.()}
         />
       )}
 
