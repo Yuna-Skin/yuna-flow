@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { Flower2 } from "lucide-react";
 import { recordConsent } from "@/lib/consent.functions";
+import { logAuditEvent } from "@/lib/audit-log.functions";
 import { TERMS_VERSION, PRIVACY_VERSION } from "@/lib/legal-versions";
 
 export const Route = createFileRoute("/auth")({
@@ -27,6 +28,7 @@ function AuthPage() {
   const [acceptPrivacy, setAcceptPrivacy] = useState(false);
   const [busy, setBusy] = useState(false);
   const submitConsent = useServerFn(recordConsent);
+  const writeAuditLog = useServerFn(logAuditEvent);
 
   useEffect(() => {
     if (session) navigate({ to: "/" });
