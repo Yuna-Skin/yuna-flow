@@ -15,7 +15,7 @@ export const Route = createFileRoute("/_authenticated/")({
   component: HomePage,
 });
 
-type Day = { id: string; day_number: number; title: string };
+type Day = { id: string; day_number: number; title: string; audio_url: string | null };
 type Week = { id: string; title: string; order_index: number; days: Day[] };
 
 function HomePage() {
