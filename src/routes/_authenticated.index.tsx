@@ -198,6 +198,9 @@ function HomePage() {
             alt={activeWeek?.title ?? "Semana"}
             decoding="async"
             fetchPriority="high"
+            onError={() => {
+              queryClient.invalidateQueries({ queryKey: ["week-thumb", activeWeek?.id, activeWeek?.thumbnail_url] });
+            }}
             className="absolute inset-0 h-full w-full object-cover transition-transform duration-1000 hover:scale-105"
           />
         ) : (
