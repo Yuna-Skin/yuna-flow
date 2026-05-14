@@ -13,12 +13,15 @@ export const Route = createFileRoute("/_authenticated/community")({
   component: CommunityPage,
 });
 
+type Status = "pending" | "approved" | "rejected";
+
 type Post = {
   id: string;
   user_id: string;
   content: string;
   likes_count: number;
   created_at: string;
+  status: Status;
   author_name: string;
   comment_count: number;
 };
@@ -38,12 +41,12 @@ function CommunityPage() {
     const [{ data: list }, { data: likes }] = await Promise.all([
       supabase
         .from("community_posts")
-        .select("id, user_id, content, likes_count, created_at, profiles!community_posts_profile_fk(name), comments(id)")
+        .select("id, user_id, content, likes_count, created_at, status, profiles!community_posts_profile_fk(name), comments(id)")
         .order("created_at", { ascending: false }),
       supabase.from("post_likes").select("post_id").eq("user_id", user.id),
     ]);
     type Row = {
-      id: string; user_id: string; content: string; likes_count: number; created_at: string;
+      id: string; user_id: string; content: string; likes_count: number; created_at: string; status: Status;
       profiles: { name: string } | { name: string }[] | null;
       comments: { id: string }[] | null;
     };
@@ -55,6 +58,7 @@ function CommunityPage() {
         content: p.content,
         likes_count: p.likes_count,
         created_at: p.created_at,
+        status: p.status,
         author_name: prof?.name ?? "Praticante",
         comment_count: p.comments?.length ?? 0,
       };
@@ -72,7 +76,7 @@ function CommunityPage() {
     setPosting(false);
     if (error) { toast.error(error.message); return; }
     setContent("");
-    toast.success("Post publicado");
+    toast.success("Mensagem enviada para revisão");
     load();
   };
 
