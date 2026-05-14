@@ -16,7 +16,7 @@ export const Route = createFileRoute("/_authenticated/")({
   component: HomePage,
 });
 
-type Day = { id: string; day_number: number; title: string; audio_url: string | null };
+type Day = { id: string; day_number: number; title: string; audio_url: string | null; respiration_text?: string | null; reflection_text?: string | null };
 type Week = { id: string; title: string; order_index: number; thumbnail_url: string | null; days: Day[] };
 
 function HomePage() {
@@ -30,7 +30,7 @@ function HomePage() {
     queryFn: async (): Promise<Week[]> => {
       const { data, error } = await supabase
         .from("weeks")
-        .select("id, title, order_index, thumbnail_url, days(id, day_number, title, audio_url)")
+        .select("id, title, order_index, thumbnail_url, days(id, day_number, title, audio_url, respiration_text, reflection_text)")
         .order("order_index", { ascending: true })
         .order("day_number", { foreignTable: "days", ascending: true });
       if (error) throw error;
@@ -367,12 +367,15 @@ function HomePage() {
                   </div>
                 </div>
               </div>
-              <div className="p-4">
-                <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-                  Dia {currentDay.day_number}
-                </p>
-                <p className="mt-1 font-display text-2xl leading-tight text-foreground">
-                  {currentDay.title ?? currentWeek?.title ?? ""}
+              <div className="p-5">
+                <div className="flex items-center gap-2">
+                  <span className="text-base leading-none">🫁</span>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                    {currentDay.respiration_text ? "Respire antes de começar" : currentDay.reflection_text ? "Reflexão de hoje" : `Dia ${currentDay.day_number}`}
+                  </p>
+                </div>
+                <p className="mt-2 font-display text-[15px] leading-[1.45] text-foreground/90">
+                  {currentDay.respiration_text ?? currentDay.reflection_text ?? currentDay.title ?? ""}
                 </p>
               </div>
             </Card>
