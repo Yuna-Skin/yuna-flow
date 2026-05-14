@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { ChevronRight, ArrowLeft, Shield, FileText, Cookie, Lock } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/settings")({
@@ -6,6 +6,14 @@ export const Route = createFileRoute("/_authenticated/settings")({
 });
 
 function SettingsPage() {
+  const pathname = useRouterState({
+    select: (state) => state.location.pathname,
+  });
+
+  if (pathname !== "/settings") {
+    return <Outlet />;
+  }
+
   return (
     <div className="px-5 pb-6 pt-8">
       <Link
