@@ -178,12 +178,56 @@ function DayPage() {
     staleTime: 10 * 60_000,
   });
 
+  const weeksFullQ = useQuery({
+    queryKey: ["weeks-with-days"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("weeks")
+        .select("id, order_index, days(id, is_rest)")
+        .order("order_index");
+      return data ?? [];
+    },
+    staleTime: 10 * 60_000,
+  });
+
+  const allProgressQ = useQuery({
+    queryKey: ["user_progress", user?.id],
+    enabled: !authLoading && !!user,
+    queryFn: async (): Promise<Set<string>> => {
+      const { data } = await supabase
+        .from("user_progress")
+        .select("day_id")
+        .eq("user_id", user!.id)
+        .eq("completed", true);
+      return new Set((data ?? []).map((p) => p.day_id));
+    },
+  });
+
   const loading = authLoading || dayQ.isLoading || progressQ.isLoading || weeksQ.isLoading;
   const day = dayQ.data;
   const weeks = weeksQ.data ?? [];
   const weekNumber = day?.week_id ? weeks.findIndex((w) => w.id === day.week_id) + 1 : 0;
   const completedSet = progressQ.data ?? new Set<string>();
   const isCompleted = day ? completedSet.has(day.id) : false;
+
+  // Lock check: a week is unlocked only when previous week's non-rest days are all completed.
+  const weeksFull = weeksFullQ.data ?? [];
+  const allCompleted = allProgressQ.data ?? new Set<string>();
+  const dayWeekIdx = day?.week_id ? weeksFull.findIndex((w) => w.id === day.week_id) : -1;
+  const isLocked = (() => {
+    if (dayWeekIdx <= 0) return false;
+    const prev = weeksFull[dayWeekIdx - 1] as { days: { id: string; is_rest: boolean }[] } | undefined;
+    if (!prev) return false;
+    const prevActive = (prev.days ?? []).filter((d) => !d.is_rest);
+    return !(prevActive.length > 0 && prevActive.every((d) => allCompleted.has(d.id)));
+  })();
+
+  useEffect(() => {
+    if (!loading && day && isLocked) {
+      toast.error("Conclua a semana anterior para desbloquear");
+      navigate({ to: "/" });
+    }
+  }, [loading, day, isLocked, navigate]);
 
   useEffect(() => {
     if (!loading && !day) {
