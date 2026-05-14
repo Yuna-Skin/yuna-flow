@@ -525,6 +525,7 @@ export type Database = {
           id: string
           order_index: number
           program_id: string
+          thumbnail_url: string | null
           title: string
         }
         Insert: {
@@ -532,6 +533,7 @@ export type Database = {
           id?: string
           order_index: number
           program_id: string
+          thumbnail_url?: string | null
           title: string
         }
         Update: {
@@ -539,6 +541,7 @@ export type Database = {
           id?: string
           order_index?: number
           program_id?: string
+          thumbnail_url?: string | null
           title?: string
         }
         Relationships: [
