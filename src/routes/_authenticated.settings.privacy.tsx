@@ -109,6 +109,13 @@ function PrivacyPage() {
             seus dados a qualquer momento. Para acesso e portabilidade, escreva
             para <strong>privacidade@yuna.com</strong>.
           </p>
+          <Link
+            to="/politica-de-privacidade"
+            className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+          >
+            Ler Política de Privacidade
+            <ArrowLeft className="h-3.5 w-3.5 rotate-180" />
+          </Link>
         </div>
       </section>
 
