@@ -380,6 +380,19 @@ function HomePage() {
                   </p>
                 </div>
               </div>
+              {(currentDay.respiration_text || currentDay.reflection_text) && (
+                <div className="p-5">
+                  <div className="flex items-center gap-2">
+                    <span className="text-base leading-none">🫁</span>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                      {currentDay.respiration_text ? "Respire antes de começar" : "Reflexão de hoje"}
+                    </p>
+                  </div>
+                  <p className="mt-2 font-display text-[15px] leading-[1.45] text-foreground/90">
+                    {currentDay.respiration_text ?? currentDay.reflection_text}
+                  </p>
+                </div>
+              )}
             </Card>
           </Link>
         </div>
