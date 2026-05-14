@@ -1,186 +1,131 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { createFileRoute } from "@tanstack/react-router";
 import { Card } from "@/components/ui/card";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
-import { Sparkles, Calendar, ArrowRight, Clock } from "lucide-react";
-import { optimizeCloudinary } from "@/lib/cloudinary";
+import { Sparkles, BookOpen, Download, Lock, Headphones, FileText, ArrowUpRight } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/plus")({
-  component: FeedPage,
+  component: PlusPage,
 });
 
-type Week = {
+type BonusKind = "ebook" | "audio" | "pdf" | "guide";
+
+type BonusItem = {
   id: string;
+  kind: BonusKind;
   title: string;
-  order_index: number;
-  thumbnail_url: string | null;
-  days: { id: string }[];
+  description: string;
+  meta: string;
+  url?: string;
+  locked?: boolean;
 };
 
-function FeedPage() {
-  const weeksQ = useQuery({
-    queryKey: ["feed-weeks"],
-    queryFn: async (): Promise<Week[]> => {
-      const { data } = await supabase
-        .from("weeks")
-        .select("id, title, order_index, thumbnail_url, days(id)")
-        .order("order_index", { ascending: true });
-      return (data ?? []) as Week[];
-    },
-    staleTime: 10 * 60_000,
-  });
+// TODO: mover pra tabela `bonus_items` no Supabase quando tivermos +5 itens.
+// Estrutura já espelha o shape da futura tabela: { id, kind, title, description, meta, url, locked }.
+const BONUSES: BonusItem[] = [
+  {
+    id: "ebook-rotina",
+    kind: "ebook",
+    title: "Ebook: Rotina facial completa",
+    description: "Guia passo a passo da limpeza ao protetor solar, com produtos por tipo de pele.",
+    meta: "PDF · 24 páginas",
+    locked: true,
+  },
+  {
+    id: "guia-respiracao",
+    kind: "guide",
+    title: "Guia de respiração consciente",
+    description: "3 técnicas para começar cada prática mais relaxada e presente.",
+    meta: "PDF · 8 páginas",
+    locked: true,
+  },
+  {
+    id: "audio-meditacao",
+    kind: "audio",
+    title: "Meditação guiada — 10 min",
+    description: "Áudio para fazer antes da prática facial e potencializar o relaxamento.",
+    meta: "Áudio · 10 min",
+    locked: true,
+  },
+];
 
-  const weeks = weeksQ.data ?? [];
+const KIND_META: Record<BonusKind, { label: string; icon: typeof BookOpen; tone: string }> = {
+  ebook:  { label: "Ebook",  icon: BookOpen,    tone: "from-rose-500/20 to-rose-500/5 text-rose-600" },
+  audio:  { label: "Áudio",  icon: Headphones,  tone: "from-violet-500/20 to-violet-500/5 text-violet-600" },
+  pdf:    { label: "PDF",    icon: FileText,    tone: "from-amber-500/20 to-amber-500/5 text-amber-600" },
+  guide:  { label: "Guia",   icon: FileText,    tone: "from-emerald-500/20 to-emerald-500/5 text-emerald-600" },
+};
 
+function PlusPage() {
   return (
     <div className="px-5 pb-10 pt-8">
       <div className="flex items-center gap-2">
         <Sparkles className="h-4 w-4 text-primary" />
         <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-primary">
-          Conteúdo
+          Plus
         </p>
       </div>
       <h1 className="mt-2 font-display text-3xl leading-tight text-foreground">
-        Dicas & jornada
+        Conteúdo extra
       </h1>
       <p className="mt-1 text-sm text-muted-foreground">
-        Aprenda mais sobre o programa e cada semana de prática
+        Bônus exclusivos pra aprofundar sua jornada — ebooks, áudios e guias.
       </p>
 
-      {weeks.length > 0 && (
-        <section className="mt-8 space-y-8">
-          <div>
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-[11px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
-                Sobre o programa
-              </h2>
-              <div className="relative flex items-center gap-2" id="weeks-carousel-nav" />
-            </div>
+      <section className="mt-8 space-y-3">
+        {BONUSES.map((b) => {
+          const meta = KIND_META[b.kind];
+          const Icon = meta.icon;
+          const Wrapper: React.ElementType = b.locked || !b.url ? "div" : "a";
+          const wrapperProps = b.url && !b.locked
+            ? { href: b.url, target: "_blank" as const, rel: "noreferrer" }
+            : {};
 
-            <Carousel
-              opts={{ align: "start", loop: false }}
-              className="-mx-5"
-            >
-              <CarouselContent className="ml-0 px-5">
-                {weeks.map((w, i) => {
-                  const thumb = optimizeCloudinary(w.thumbnail_url, { width: 720, crop: "fill" });
-                  return (
-                    <CarouselItem
-                      key={w.id}
-                      className="basis-full pl-0 pr-4"
-                    >
-                      <Card className="group relative overflow-hidden rounded-[32px] border-0 bg-black p-0 text-white shadow-none">
-                        <div className="relative aspect-[3/4] w-full">
-                          {thumb ? (
-                            <img
-                              src={thumb}
-                              alt={w.title}
-                              loading="lazy"
-                              decoding="async"
-                              className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                            />
-                          ) : (
-                            <div className="absolute inset-0 bg-gradient-to-br from-primary/40 via-zinc-800 to-black" />
-                          )}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
-
-                          {/* top badges */}
-                          <div className="absolute inset-x-0 top-0 flex items-center justify-between p-5">
-                            <span className="rounded-full bg-white/15 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] backdrop-blur-md">
-                              Semana {i + 1}
-                            </span>
-                            <span className="flex items-center gap-1 rounded-full bg-white/15 px-3 py-1 text-[10px] font-semibold backdrop-blur-md">
-                              <Clock className="h-3 w-3" />
-                              {w.days.length * 5} min
-                            </span>
-                          </div>
-
-                          {/* bottom content */}
-                          <div className="absolute inset-x-0 bottom-0 p-6">
-                            <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                              <Calendar className="h-3 w-3" />
-                              {w.days.length} dias de prática
-                            </p>
-                            <h3 className="mt-2 font-display text-3xl leading-tight">
-                              {w.title}
-                            </h3>
-                            <Link
-                              to="/"
-                              className="mt-4 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-semibold uppercase tracking-wider text-black transition hover:bg-white/90"
-                            >
-                              Acessar semana
-                              <ArrowRight className="h-3.5 w-3.5" />
-                            </Link>
-                          </div>
-                        </div>
-                      </Card>
-                    </CarouselItem>
-                  );
-                })}
-              </CarouselContent>
-              <div className="mt-4 flex items-center justify-end gap-3 pr-5">
-                <CarouselPrevious className="static translate-x-0 translate-y-0 h-11 w-11 border-border/40 bg-card hover:bg-muted" />
-                <CarouselNext className="static translate-x-0 translate-y-0 h-11 w-11 border-border/40 bg-card hover:bg-muted" />
-              </div>
-            </Carousel>
-          </div>
-
-          {/* Tips section */}
-          <div>
-            <h2 className="mb-3 text-[11px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
-              Dicas para aproveitar
-            </h2>
-            <div className="space-y-3">
-              {[
-                {
-                  title: "Constância acima de intensidade",
-                  text: "Práticas curtas todos os dias trazem mais resultado que sessões longas esporádicas.",
-                },
-                {
-                  title: "Respire antes de começar",
-                  text: "Três respirações profundas relaxam a musculatura e potencializam cada movimento.",
-                },
-                {
-                  title: "Hidrate a pele",
-                  text: "Aplique seu sérum ou óleo favorito antes da prática para deslizar melhor.",
-                },
-              ].map((tip, i) => (
-                <Card
-                  key={i}
-                  className="rounded-2xl border border-border/40 bg-card/60 p-4 backdrop-blur-sm"
-                >
-                  <div className="flex gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                      <Sparkles className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <h4 className="font-display text-base text-foreground">
-                        {tip.title}
-                      </h4>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        {tip.text}
-                      </p>
-                    </div>
+          return (
+            <Wrapper key={b.id} {...wrapperProps} className="block">
+              <Card className="group relative overflow-hidden rounded-3xl border border-border/40 bg-card/60 p-5 backdrop-blur-sm transition hover:border-border/70">
+                <div className="flex gap-4">
+                  <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${meta.tone}`}>
+                    <Icon className="h-6 w-6" strokeWidth={1.75} />
                   </div>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                        {meta.label}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground/60">·</span>
+                      <span className="text-[10px] text-muted-foreground/80">{b.meta}</span>
+                    </div>
+                    <h3 className="mt-1 font-display text-lg leading-tight text-foreground">
+                      {b.title}
+                    </h3>
+                    <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                      {b.description}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 items-start">
+                    {b.locked ? (
+                      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                        <Lock className="h-3.5 w-3.5" />
+                      </span>
+                    ) : (
+                      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary transition group-hover:bg-primary group-hover:text-primary-foreground">
+                        {b.url?.startsWith("http") ? (
+                          <ArrowUpRight className="h-4 w-4" />
+                        ) : (
+                          <Download className="h-4 w-4" />
+                        )}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </Card>
+            </Wrapper>
+          );
+        })}
+      </section>
 
-      {weeks.length === 0 && (
-        <p className="mt-10 text-center text-sm text-muted-foreground">
-          Nenhum conteúdo disponível ainda.
-        </p>
-      )}
+      <p className="mt-8 text-center text-xs text-muted-foreground/70">
+        Mais bônus chegando em breve ✨
+      </p>
     </div>
   );
 }
