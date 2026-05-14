@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { getLatestConsent, recordConsent } from "@/lib/consent.functions";
+import { logAuditEvent } from "@/lib/audit-log.functions";
 import { TERMS_VERSION, PRIVACY_VERSION } from "@/lib/legal-versions";
 import { supabase } from "@/integrations/supabase/client";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -13,6 +14,7 @@ import { toast } from "sonner";
 export function LegalGate({ children }: { children: React.ReactNode }) {
   const fetchLatest = useServerFn(getLatestConsent);
   const submitConsent = useServerFn(recordConsent);
+  const writeAuditLog = useServerFn(logAuditEvent);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
