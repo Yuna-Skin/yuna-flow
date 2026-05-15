@@ -1,10 +1,21 @@
-import { createFileRoute, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
 import { useAuth } from "@/lib/auth";
 import { BottomNav } from "@/components/BottomNav";
 import { LegalGate } from "@/components/LegalGate";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated")({
+  beforeLoad: async () => {
+    // Aguarda hidratação da sessão do Supabase antes de qualquer loader filho rodar.
+    // Sem isso, server fns protegidas por requireSupabaseAuth podem 401 no primeiro load
+    // porque o token (em localStorage) ainda não foi restaurado.
+    if (typeof window === "undefined") return;
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) {
+      throw redirect({ to: "/auth", replace: true });
+    }
+  },
   component: AuthenticatedLayout,
 });
 
