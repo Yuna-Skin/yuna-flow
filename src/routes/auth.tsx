@@ -137,7 +137,7 @@ function AuthPage() {
         </div>
         <h1 className="mt-6 text-4xl font-display text-foreground">Yuna Skin</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Yoga coreano em 28 dias.<br />Sua prática começa hoje.
+          Sua rotina de beleza natural.<br />Poucos minutos por dia.
         </p>
       </div>
 
