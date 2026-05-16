@@ -8,15 +8,23 @@ import {
   CONTACT_EMAIL,
   FORO,
 } from "@/lib/legal-versions";
+import { RouteError } from "@/components/RouteError";
+import { RouteNotFound } from "@/components/RouteNotFound";
 
 export const Route = createFileRoute("/termos-de-uso")({
   head: () => ({
     meta: [
       { title: "Termos de Uso — Yuna" },
-      { name: "description", content: "Termos de Uso do aplicativo Yuna." },
+      { name: "description", content: "Termos de Uso do aplicativo Yuna — yoga coreano em 28 dias." },
+      { property: "og:title", content: "Termos de Uso — Yuna" },
+      { property: "og:description", content: "Termos de Uso do aplicativo Yuna — yoga coreano em 28 dias." },
+      { property: "og:url", content: "https://yuna-flow.lovable.app/termos-de-uso" },
     ],
+    links: [{ rel: "canonical", href: "https://yuna-flow.lovable.app/termos-de-uso" }],
   }),
   component: TermsPage,
+  errorComponent: RouteError,
+  notFoundComponent: RouteNotFound,
 });
 
 function TermsPage() {
