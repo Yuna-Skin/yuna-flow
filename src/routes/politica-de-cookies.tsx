@@ -1,15 +1,23 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { LegalPageLayout } from "@/components/LegalPageLayout";
 import { COOKIES_UPDATED_AT, PRIVACY_EMAIL } from "@/lib/legal-versions";
+import { RouteError } from "@/components/RouteError";
+import { RouteNotFound } from "@/components/RouteNotFound";
 
 export const Route = createFileRoute("/politica-de-cookies")({
   head: () => ({
     meta: [
       { title: "Política de Cookies — Yuna" },
-      { name: "description", content: "Como o Yuna utiliza cookies." },
+      { name: "description", content: "Como o Yuna utiliza cookies para garantir funcionamento, segurança e melhor experiência." },
+      { property: "og:title", content: "Política de Cookies — Yuna" },
+      { property: "og:description", content: "Como o Yuna utiliza cookies para garantir funcionamento, segurança e melhor experiência." },
+      { property: "og:url", content: "https://yuna-flow.lovable.app/politica-de-cookies" },
     ],
+    links: [{ rel: "canonical", href: "https://yuna-flow.lovable.app/politica-de-cookies" }],
   }),
   component: CookiesPage,
+  errorComponent: RouteError,
+  notFoundComponent: RouteNotFound,
 });
 
 function CookiesPage() {
