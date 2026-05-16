@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
-import { ChevronRight, ArrowLeft, Shield, FileText, Cookie, Lock } from "lucide-react";
+import { ChevronRight, ArrowLeft, Shield, FileText, Cookie, Lock, Info, Receipt } from "lucide-react";
 import { RouteError } from "@/components/RouteError";
 import { RouteNotFound } from "@/components/RouteNotFound";
 
