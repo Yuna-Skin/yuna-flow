@@ -91,12 +91,23 @@ function PlusPage() {
 
           return (
             <Wrapper key={b.id} {...wrapperProps} className="block">
-              <Card className="group relative overflow-hidden rounded-3xl border border-border/40 bg-card/60 p-5 backdrop-blur-sm transition hover:border-border/70">
+              <Card className="group relative overflow-hidden rounded-3xl border border-border/40 bg-card/60 p-3 backdrop-blur-sm transition hover:border-border/70">
                 <div className="flex gap-4">
-                  <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${meta.tone}`}>
-                    <Icon className="h-6 w-6" strokeWidth={1.75} />
-                  </div>
-                  <div className="min-w-0 flex-1">
+                  {b.cover ? (
+                    <div className="relative h-24 w-20 shrink-0 overflow-hidden rounded-2xl bg-muted">
+                      <img
+                        src={optimizeCloudinary(b.cover, { width: 240, height: 320, crop: "fill" }) ?? b.cover}
+                        alt={b.title}
+                        loading="lazy"
+                        className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+                      />
+                    </div>
+                  ) : (
+                    <div className={`flex h-24 w-20 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${meta.tone}`}>
+                      <Icon className="h-6 w-6" strokeWidth={1.75} />
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1 py-1">
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                         {meta.label}
@@ -104,14 +115,14 @@ function PlusPage() {
                       <span className="text-[10px] text-muted-foreground/60">·</span>
                       <span className="text-[10px] text-muted-foreground/80">{b.meta}</span>
                     </div>
-                    <h3 className="mt-1 font-display text-lg leading-tight text-foreground">
+                    <h3 className="mt-1 font-display text-base leading-tight text-foreground">
                       {b.title}
                     </h3>
-                    <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                    <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
                       {b.description}
                     </p>
                   </div>
-                  <div className="flex shrink-0 items-start">
+                  <div className="flex shrink-0 items-start pt-1">
                     {b.locked ? (
                       <span className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground">
                         <Lock className="h-3.5 w-3.5" />
