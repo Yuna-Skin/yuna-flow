@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Sparkles, BookOpen, Download, Lock, Headphones, FileText, ArrowUpRight } from "lucide-react";
 import { RouteError } from "@/components/RouteError";
 import { RouteNotFound } from "@/components/RouteNotFound";
+import { optimizeCloudinary } from "@/lib/cloudinary";
 
 export const Route = createFileRoute("/_authenticated/plus")({
   errorComponent: RouteError,
@@ -18,36 +19,41 @@ type BonusItem = {
   title: string;
   description: string;
   meta: string;
+  cover?: string;
   url?: string;
   locked?: boolean;
 };
 
+const EBOOK_BASE = "https://peledeporcelanas.lovable.app/ebook";
+
 // TODO: mover pra tabela `bonus_items` no Supabase quando tivermos +5 itens.
-// Estrutura já espelha o shape da futura tabela: { id, kind, title, description, meta, url, locked }.
 const BONUSES: BonusItem[] = [
   {
-    id: "protocolo-pele-porcelana",
+    id: "pele-de-porcelana",
     kind: "ebook",
     title: "Protocolo Pele de Porcelana",
     description: "O ritual usado para deixar a pele uniforme, viçosa e bonita mesmo sem maquiagem.",
-    meta: "Em breve",
-    locked: true,
+    meta: "Bônus 01",
+    cover: "https://res.cloudinary.com/dqsuj0pjy/image/upload/v1778975052/Uma_mulher_relaxando_profundamente_a_202605162043_w4zm3x.jpg",
+    url: `${EBOOK_BASE}/pele-de-porcelana`,
   },
   {
-    id: "guia-anti-erros-botox-coreano",
+    id: "anti-erros",
     kind: "guide",
-    title: "Guia anti-erros do botox coreano manual",
+    title: "Guia Anti-Erros do Botox Coreano Manual",
     description: "Os erros silenciosos que impedem resultados e como evitar cada um deles.",
-    meta: "Em breve",
-    locked: true,
+    meta: "Bônus 02",
+    cover: "https://res.cloudinary.com/dqsuj0pjy/image/upload/v1778986049/Retrato_editorial_sofisticado_de_uma_202605162347_ojdhii.jpg",
+    url: `${EBOOK_BASE}/anti-erros`,
   },
   {
-    id: "plano-leve-pos-desafio",
+    id: "manutencao",
     kind: "guide",
     title: "Plano Leve de Manutenção Pós-Desafio",
     description: "Como preservar sua juventude facial conquistada com leveza e inteligência.",
-    meta: "Em breve",
-    locked: true,
+    meta: "Bônus 03",
+    cover: "https://res.cloudinary.com/dqsuj0pjy/image/upload/v1779056395/Close-up_editorial_extremamente_sofisticado_de_202605171918_bo6vcy.jpg",
+    url: `${EBOOK_BASE}/manutencao`,
   },
 ];
 
@@ -85,12 +91,23 @@ function PlusPage() {
 
           return (
             <Wrapper key={b.id} {...wrapperProps} className="block">
-              <Card className="group relative overflow-hidden rounded-3xl border border-border/40 bg-card/60 p-5 backdrop-blur-sm transition hover:border-border/70">
+              <Card className="group relative overflow-hidden rounded-3xl border border-border/40 bg-card/60 p-3 backdrop-blur-sm transition hover:border-border/70">
                 <div className="flex gap-4">
-                  <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${meta.tone}`}>
-                    <Icon className="h-6 w-6" strokeWidth={1.75} />
-                  </div>
-                  <div className="min-w-0 flex-1">
+                  {b.cover ? (
+                    <div className="relative h-24 w-20 shrink-0 overflow-hidden rounded-2xl bg-muted">
+                      <img
+                        src={optimizeCloudinary(b.cover, { width: 240, height: 320, crop: "fill" }) ?? b.cover}
+                        alt={b.title}
+                        loading="lazy"
+                        className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+                      />
+                    </div>
+                  ) : (
+                    <div className={`flex h-24 w-20 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${meta.tone}`}>
+                      <Icon className="h-6 w-6" strokeWidth={1.75} />
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1 py-1">
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
                         {meta.label}
@@ -98,14 +115,14 @@ function PlusPage() {
                       <span className="text-[10px] text-muted-foreground/60">·</span>
                       <span className="text-[10px] text-muted-foreground/80">{b.meta}</span>
                     </div>
-                    <h3 className="mt-1 font-display text-lg leading-tight text-foreground">
+                    <h3 className="mt-1 font-display text-base leading-tight text-foreground">
                       {b.title}
                     </h3>
-                    <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                    <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
                       {b.description}
                     </p>
                   </div>
-                  <div className="flex shrink-0 items-start">
+                  <div className="flex shrink-0 items-start pt-1">
                     {b.locked ? (
                       <span className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground">
                         <Lock className="h-3.5 w-3.5" />
